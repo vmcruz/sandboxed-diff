@@ -1,0 +1,64 @@
+name: Create Release
+run-name: Create ${{ inputs.release_type }} release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        type: choice
+        description: 'Select the release type'
+        options:
+          - patch
+          - minor
+          - major
+        required: true
+
+permissions:
+  contents: write  # Required for committing version bump
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify lint and testing
+        run: tsc --noEmit && npm run lint && npm run test
+
+      - name: Configure github-actions user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version in package.json
+        id: version_bump
+        run: |
+          VERSION=$(npm version ${{ inputs.release_type }} -m "v%s")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Push version bump and tag
+        run: |
+          git push origin main
+          git push origin $VERSION
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Release ${{ env.VERSION }}"
+          draft: true
+          generate_release_notes: true
+          tag_name: ${{ env.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

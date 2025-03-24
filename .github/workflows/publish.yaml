@@ -1,0 +1,55 @@
+name: Publish to npm
+run-name: ${{ github.ref_name }} ${{ inputs.dry_run == true && ' (dry-run)' || '' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        type: boolean
+        description: Run as a dry-run (no publish)
+        default: true
+
+permissions:
+  id-token: write # Required for --provenancepermissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: |
+          if [[ "${{ github.ref }}" != refs/tags/* ]]; then
+            echo "This workflow can only be run from a tag."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Extract dist tag from version
+        id: dist_tag
+        run: echo "value=$(cat package.json | jq -r '.version | split("-") | .[1] // "latest" | split(".") | .[0]')" >> $GITHUB_OUTPUT
+
+      - name: Dry run publish (${{ steps.dist_tag.outputs.value }})
+        run: npm publish --dry-run --provenance --tag ${{ steps.dist_tag.outputs.value }} --access=public
+        if: inputs.dry_run == true
+
+      - name: Publish to npm
+        run: npm publish --provenance --tag ${{ steps.dist_tag.outputs.value }} --access=public
+        if: inputs.dry_run == false
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

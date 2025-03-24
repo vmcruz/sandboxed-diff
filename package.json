@@ -1,0 +1,68 @@
+{
+  "name": "@sandboxed/diff",
+  "version": "1.0.0",
+  "description": "A zero dependency, high-performance, security-conscious JavaScript diffing library",
+  "type": "module",
+  "main": "lib/index.cjs",
+  "module": "lib/index.js",
+  "exports": {
+    "import": "./lib/index.js",
+    "require": "./lib/index.cjs"
+  },
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib",
+    "docs"
+  ],
+  "scripts": {
+    "test": "TZ=UTC jest",
+    "test:coverage": "jest --coverage=true",
+    "lint": "eslint",
+    "bump:beta": "./scripts/bump_beta.sh",
+    "build": "tsc --noEmit && npm run lint && npm run test && tsup"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vmcruz/sandboxed-diff.git"
+  },
+  "keywords": [
+    "javascript",
+    "js",
+    "object",
+    "differ",
+    "diffing",
+    "diff",
+    "object-diff",
+    "obj-diff",
+    "obj"
+  ],
+  "author": "vmcruz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vmcruz/sandboxed-diff/issues"
+  },
+  "homepage": "https://github.com/vmcruz/sandboxed-diff#readme",
+  "devDependencies": {
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-typescript": "^7.26.0",
+    "@eslint/js": "^9.20.0",
+    "@stylistic/eslint-plugin": "^4.0.1",
+    "@types/node": "^22.13.4",
+    "babel-jest": "^29.7.0",
+    "eslint": "^9.20.1",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-jest": "^28.11.0",
+    "eslint-plugin-prettier": "^5.2.3",
+    "globals": "^16.0.0",
+    "jest": "30.0.0-alpha.7",
+    "prettier": "3.5.1",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.1"
+  },
+  "engines": {
+    "node": ">=16.9.0"
+  },
+  "engineStrict": true
+}
