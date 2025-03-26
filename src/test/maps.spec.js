@@ -343,4 +343,31 @@ describe('Diff Maps', () => {
       { type: ChangeType.NOOP, str: '}', depth: 0, path: [] },
     ]);
   });
+
+  it('handles the same reference multiple times', () => {
+    const sameRef = {};
+    const a = new Map([
+      ['foo', sameRef],
+      ['bar', sameRef],
+    ]);
+
+    expect(diff(undefined, a)).toEqual([
+      { type: ChangeType.ADD, str: 'Map (2) {', depth: 0, path: [] },
+      {
+        type: ChangeType.ADD,
+        str: '"foo": {',
+        depth: 1,
+        path: ['__MAP__', 'foo'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: ['__MAP__', 'foo'] },
+      {
+        type: ChangeType.ADD,
+        str: '"bar": {',
+        depth: 1,
+        path: ['__MAP__', 'bar'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: ['__MAP__', 'bar'] },
+      { type: ChangeType.ADD, str: '}', depth: 0, path: [] },
+    ]);
+  });
 });
