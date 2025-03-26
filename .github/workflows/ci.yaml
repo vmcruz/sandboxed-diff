@@ -1,5 +1,5 @@
 name: CI
-run-name: CI run for ${{ github.ref_name }}
+run-name: CI run for ${{ github.head_ref }}
 
 on:
   pull_request:
