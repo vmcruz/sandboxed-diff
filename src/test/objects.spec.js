@@ -296,8 +296,12 @@ describe('Diff Objects', () => {
     const sameRef = {};
     const a = {
       foo: sameRef,
-      bar: sameRef,
+      bar: {
+        baz: sameRef,
+      },
     };
+
+    a.self = a;
 
     expect(diff(undefined, a)).toEqual([
       { type: ChangeType.ADD, str: '{', depth: 0, path: [] },
@@ -314,7 +318,20 @@ describe('Diff Objects', () => {
         depth: 1,
         path: ['bar'],
       },
+      {
+        type: ChangeType.ADD,
+        str: '"baz": {',
+        depth: 2,
+        path: ['bar', 'baz'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 2, path: ['bar', 'baz'] },
       { type: ChangeType.ADD, str: '},', depth: 1, path: ['bar'] },
+      {
+        type: ChangeType.ADD,
+        str: '"self": [Circular],',
+        depth: 1,
+        path: ['self'],
+      },
       { type: ChangeType.ADD, str: '}', depth: 0, path: [] },
     ]);
   });

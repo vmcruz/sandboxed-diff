@@ -298,7 +298,7 @@ describe('Diff Sets', () => {
 
   it('handles the same reference multiple times', () => {
     const sameRef = {};
-    const a = new Set([sameRef, sameRef]);
+    const a = new Set([{ foo: sameRef }, { bar: sameRef }]);
 
     expect(diff(undefined, a)).toEqual([
       { type: ChangeType.ADD, str: 'Set [', depth: 0, path: [] },
@@ -308,6 +308,13 @@ describe('Diff Sets', () => {
         depth: 1,
         path: ['__SET__'],
       },
+      {
+        type: ChangeType.ADD,
+        str: '"foo": {',
+        depth: 2,
+        path: ['__SET__', 'foo'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 2, path: ['__SET__', 'foo'] },
       { type: ChangeType.ADD, str: '},', depth: 1, path: ['__SET__'] },
       {
         type: ChangeType.ADD,
@@ -315,6 +322,13 @@ describe('Diff Sets', () => {
         depth: 1,
         path: ['__SET__'],
       },
+      {
+        type: ChangeType.ADD,
+        str: '"bar": {',
+        depth: 2,
+        path: ['__SET__', 'bar'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 2, path: ['__SET__', 'bar'] },
       { type: ChangeType.ADD, str: '},', depth: 1, path: ['__SET__'] },
       { type: ChangeType.ADD, str: ']', depth: 0, path: [] },
     ]);
