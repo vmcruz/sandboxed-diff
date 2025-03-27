@@ -7,6 +7,7 @@ import {
   includeDiffType,
   lastPathValue,
   maxKeysSecurityCheck,
+  stringify,
   timeoutSecurityCheck,
 } from './shared';
 
@@ -72,7 +73,7 @@ function diffSets({
     if (includeDiffType(type, config)) {
       result.push({
         type,
-        str: `${JSON.stringify(value)},`,
+        str: `${stringify(value, config)},`,
         depth,
         path: [...updatedPath, lastPathValue(type, value)],
       });
