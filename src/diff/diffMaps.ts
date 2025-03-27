@@ -6,6 +6,7 @@ import {
   getObjectChangeResult,
   getPathHint,
   maxKeysSecurityCheck,
+  shouldRedactValue,
   timeoutSecurityCheck,
 } from './shared';
 
@@ -34,6 +35,7 @@ function diffMaps({
       timeoutSecurityCheck(startedAt, config);
     }
 
+    const redactable = shouldRedactValue(key, config);
     const keyInLhs = lhs.has(key);
     const keyInRhs = rhs.has(key);
     const lhsValue = keyInLhs ? lhs.get(key) : null;
@@ -42,7 +44,7 @@ function diffMaps({
     const pathUpdate = hint ? [hint, key] : [key];
     const updatedPath = [...path, ...pathUpdate];
 
-    if (isIterable(lhsValue) || isIterable(rhsValue)) {
+    if (!redactable && (isIterable(lhsValue) || isIterable(rhsValue))) {
       result.push(
         ...recursiveDiff({
           lhs: lhsValue,

@@ -10,10 +10,13 @@ export function includeDiffType(type: ChangeType, config: DiffConfig) {
   return config.include?.includes?.(type) && !config.exclude?.includes?.(type);
 }
 
-export function shouldRedactValue(key: any, config: DiffConfig) {
-  const rawKey = getRawValue(key);
+export function shouldRedactValue(
+  key: string | number | symbol,
+  config: DiffConfig
+) {
+  if (!isPrimitive(key)) return false;
 
-  return config.redactKeys?.includes?.(rawKey);
+  return config.redactKeys?.includes?.(key.toString());
 }
 
 export function createReplacer(config: DiffConfig, obj: any) {

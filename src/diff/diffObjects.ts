@@ -5,6 +5,7 @@ import {
   buildResult,
   getObjectChangeResult,
   maxKeysSecurityCheck,
+  shouldRedactValue,
   timeoutSecurityCheck,
 } from './shared';
 
@@ -36,13 +37,14 @@ function diffObjects({
       timeoutSecurityCheck(startedAt, config);
     }
 
+    const redactable = shouldRedactValue(key, config);
     const lhsValue = Array.isArray(lhs) ? lhs[key as number] : lhs?.[key];
     const rhsValue = Array.isArray(rhs) ? rhs[key as number] : rhs?.[key];
     const numericKey = typeof key !== 'symbol' ? Number(key) : NaN;
     const parsedKey = isNaN(numericKey) ? key : numericKey;
     const updatedPath = [...path, parsedKey];
 
-    if (isIterable(lhsValue) || isIterable(rhsValue)) {
+    if (!redactable && (isIterable(lhsValue) || isIterable(rhsValue))) {
       result.push(
         ...recursiveDiff({
           lhs: lhsValue,

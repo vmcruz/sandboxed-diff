@@ -64,6 +64,10 @@ describe('Security checks', () => {
     const symToken = Symbol('token');
     const symSecret = Symbol('secret');
 
+    const redactedObj = {
+      foo: 'redacted object',
+    };
+
     const a = {
       password: 'abcde',
       token: 'abcde',
@@ -72,7 +76,7 @@ describe('Security checks', () => {
       [symToken]: 'abcde',
       [symSecret]: 'abcde',
       safe: 'safe field',
-      sensitive: 'secret',
+      sensitive: redactedObj, // replaces the entire object
     };
 
     const b = new Map([[a, 'foo']]);
@@ -118,7 +122,7 @@ describe('Security checks', () => {
         type: ChangeType.ADD,
         str: '"sensitive": "*****",',
         depth: 1,
-        path: ['sensitive', { deleted: false, value: 'secret' }],
+        path: ['sensitive', { deleted: false, value: redactedObj }],
       },
       {
         type: ChangeType.ADD,
