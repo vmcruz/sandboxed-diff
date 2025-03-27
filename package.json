@@ -1,6 +1,6 @@
 {
   "name": "@sandboxed/diff",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A zero dependency, high-performance, security-conscious JavaScript diffing library",
   "type": "module",
   "main": "lib/index.cjs",
