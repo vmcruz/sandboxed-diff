@@ -326,21 +326,101 @@ describe('Diff Maps', () => {
     ]);
   });
 
-  it('handles circular references as keys', () => {
-    const a = new Map();
-    const b = new Map();
+  it('handles circular references in keys', () => {
+    const objKey = {};
+    objKey.self = objKey;
 
-    b.set(b, 'foo');
+    const setKey = new Set();
+    setKey.add(setKey);
+
+    const mapKey = new Map();
+    mapKey.set(mapKey, 'foo');
+
+    // Should not be detected as circular keys
+    const sameRef = {};
+    const objKeyNotCircular = { foo: sameRef, bar: sameRef };
+    const setKeyNotCircular = new Set([{ foo: sameRef }, { bar: sameRef }]);
+    const mapKeyNotCircular = new Map([
+      ['foo', sameRef],
+      ['bar', sameRef],
+    ]);
+
+    const a = new Map();
+    const b = new Map([
+      [objKey, 'bar'],
+      [setKey, 'bar'],
+      [mapKey, 'bar'],
+      [objKeyNotCircular, 'bar'],
+      [setKeyNotCircular, 'bar'],
+      [mapKeyNotCircular, 'bar'],
+    ]);
 
     expect(diff(a, b)).toEqual([
-      { type: ChangeType.NOOP, str: 'Map (1) {', depth: 0, path: [] },
+      { type: ChangeType.NOOP, str: 'Map (6) {', depth: 0, path: [] },
       {
         type: ChangeType.ADD,
-        str: '"Map (1) { \\"[Circular]\\": \\"foo\\" }": "foo",',
+        str: '{"self":"[Circular]"}: "bar",',
         depth: 1,
-        path: ['__MAP__', b, { deleted: false, value: 'foo' }],
+        path: ['__MAP__', objKey, { deleted: false, value: 'bar' }],
+      },
+      {
+        type: ChangeType.ADD,
+        str: '"Set [\\"[Circular]\\"]": "bar",',
+        depth: 1,
+        path: ['__MAP__', setKey, { deleted: false, value: 'bar' }],
+      },
+      {
+        type: ChangeType.ADD,
+        str: '"Map (1) { \\"[Circular]\\": \\"foo\\" }": "bar",',
+        depth: 1,
+        path: ['__MAP__', mapKey, { deleted: false, value: 'bar' }],
+      },
+      {
+        type: ChangeType.ADD,
+        str: '{"foo":{},"bar":{}}: "bar",',
+        depth: 1,
+        path: ['__MAP__', objKeyNotCircular, { deleted: false, value: 'bar' }],
+      },
+      {
+        type: ChangeType.ADD,
+        str: '"Set [{\\"foo\\":{}},{\\"bar\\":{}}]": "bar",',
+        depth: 1,
+        path: ['__MAP__', setKeyNotCircular, { deleted: false, value: 'bar' }],
+      },
+      {
+        type: ChangeType.ADD,
+        str: '"Map (2) { \\"foo\\": {}, \\"bar\\": {} }": "bar",',
+        depth: 1,
+        path: ['__MAP__', mapKeyNotCircular, { deleted: false, value: 'bar' }],
       },
       { type: ChangeType.NOOP, str: '}', depth: 0, path: [] },
+    ]);
+  });
+
+  it('handles the same reference multiple times', () => {
+    const sameRef = {};
+    const a = new Map([
+      ['foo', sameRef],
+      ['bar', sameRef],
+    ]);
+
+    expect(diff(undefined, a)).toEqual([
+      { type: ChangeType.ADD, str: 'Map (2) {', depth: 0, path: [] },
+      {
+        type: ChangeType.ADD,
+        str: '"foo": {',
+        depth: 1,
+        path: ['__MAP__', 'foo'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: ['__MAP__', 'foo'] },
+      {
+        type: ChangeType.ADD,
+        str: '"bar": {',
+        depth: 1,
+        path: ['__MAP__', 'bar'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: ['__MAP__', 'bar'] },
+      { type: ChangeType.ADD, str: '}', depth: 0, path: [] },
     ]);
   });
 });

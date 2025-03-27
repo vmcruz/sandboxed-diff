@@ -245,4 +245,28 @@ describe('Diff Arrays', () => {
       { type: ChangeType.NOOP, str: ']', depth: 0, path: [] },
     ]);
   });
+
+  it('handles the same reference multiple times', () => {
+    const sameRef = {};
+    const a = [sameRef, sameRef];
+
+    expect(diff(undefined, a)).toEqual([
+      { type: ChangeType.ADD, str: '[', depth: 0, path: [] },
+      {
+        type: ChangeType.ADD,
+        str: '0: {',
+        depth: 1,
+        path: [0],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: [0] },
+      {
+        type: ChangeType.ADD,
+        str: '1: {',
+        depth: 1,
+        path: [1],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: [1] },
+      { type: ChangeType.ADD, str: ']', depth: 0, path: [] },
+    ]);
+  });
 });

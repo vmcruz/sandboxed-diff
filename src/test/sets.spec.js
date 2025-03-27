@@ -295,4 +295,42 @@ describe('Diff Sets', () => {
       { type: ChangeType.NOOP, str: ']', depth: 0, path: [] },
     ]);
   });
+
+  it('handles the same reference multiple times', () => {
+    const sameRef = {};
+    const a = new Set([{ foo: sameRef }, { bar: sameRef }]);
+
+    expect(diff(undefined, a)).toEqual([
+      { type: ChangeType.ADD, str: 'Set [', depth: 0, path: [] },
+      {
+        type: ChangeType.ADD,
+        str: '"ref<Object>": {',
+        depth: 1,
+        path: ['__SET__'],
+      },
+      {
+        type: ChangeType.ADD,
+        str: '"foo": {',
+        depth: 2,
+        path: ['__SET__', 'foo'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 2, path: ['__SET__', 'foo'] },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: ['__SET__'] },
+      {
+        type: ChangeType.ADD,
+        str: '"ref<Object>": {',
+        depth: 1,
+        path: ['__SET__'],
+      },
+      {
+        type: ChangeType.ADD,
+        str: '"bar": {',
+        depth: 2,
+        path: ['__SET__', 'bar'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 2, path: ['__SET__', 'bar'] },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: ['__SET__'] },
+      { type: ChangeType.ADD, str: ']', depth: 0, path: [] },
+    ]);
+  });
 });

@@ -64,6 +64,9 @@ function diffMaps({
     );
   }
 
+  seen.delete(lhs);
+  seen.delete(rhs);
+
   return buildResult(
     rhs,
     result,

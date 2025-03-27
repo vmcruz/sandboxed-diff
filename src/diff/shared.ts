@@ -1,6 +1,6 @@
 import type { DiffConfig, DiffResult, PathHints } from '../types';
 import { ChangeType, REDACTED } from '../utils/constants';
-import { getRawValue, getWrapper } from '../utils/fns';
+import { getRawValue, getWrapper, isPrimitive } from '../utils/fns';
 
 export function lastPathValue(changeType: ChangeType, value: any) {
   return { deleted: changeType === ChangeType.REMOVE, value };
@@ -16,10 +16,16 @@ export function shouldRedactValue(key: any, config: DiffConfig) {
   return config.redactKeys?.includes?.(rawKey);
 }
 
-export function createReplacer(config: DiffConfig) {
+export function createReplacer(config: DiffConfig, obj: any) {
   const seen = new WeakSet();
 
   return function replacer(k: any, v: any) {
+    // Redact the entire value if the key matches
+    if (shouldRedactValue(k, config)) return REDACTED;
+
+    // Returns circular if iterating over the same object from the replacer
+    if (k !== '' && v === obj) return '[Circular]';
+
     if (v && typeof v === 'object') {
       if (seen.has(v)) return '[Circular]';
 
@@ -27,18 +33,38 @@ export function createReplacer(config: DiffConfig) {
     }
 
     if (v instanceof Set) {
-      return `Set ${JSON.stringify([...v.values()], replacer)}`;
+      const stringified = JSON.stringify([...v.values()], replacer);
+
+      seen.delete(v);
+      return `Set ${stringified}`;
     }
 
     if (v instanceof Map) {
       const entries = [...v.entries()];
       const stringified = entries
-        .map(
-          ([key, value]) =>
-            `${JSON.stringify(key, replacer)}: ${JSON.stringify(shouldRedactValue(key, config) ? REDACTED : value, replacer)}`
-        )
+        .map(([key, value]) => {
+          if (seen.has(key)) {
+            return `"[Circular]": ${JSON.stringify(value, replacer)}`;
+          }
+
+          if (!isPrimitive(key)) {
+            seen.add(key);
+          }
+
+          const serializedValue = shouldRedactValue(key, config)
+            ? REDACTED
+            : JSON.stringify(value, replacer);
+          const serialized = `${JSON.stringify(key, replacer)}: ${serializedValue}`;
+
+          if (!isPrimitive) {
+            seen.delete(key);
+          }
+
+          return serialized;
+        })
         .join(', ');
 
+      seen.delete(v);
       return `Map (${entries.length}) { ${stringified} }`;
     }
 
@@ -54,12 +80,13 @@ export function createReplacer(config: DiffConfig) {
       return `BigInt(${v.toString()})`;
     }
 
-    return shouldRedactValue(k, config) ? REDACTED : v;
+    seen.delete(v);
+    return v;
   };
 }
 
 export function stringify(obj: any, config: DiffConfig) {
-  return JSON.stringify(obj, createReplacer(config));
+  return JSON.stringify(obj, createReplacer(config, obj));
 }
 
 export function getObjectChangeResult(
@@ -92,13 +119,13 @@ export function getObjectChangeResult(
   const redactValue = shouldRedactValue(key, config);
   const rawValueInLhs = getRawValue(valueInLhs);
   const rawValueInRhs = getRawValue(valueInRhs);
-  const formattedValueInLhs = JSON.stringify(
+  const formattedValueInLhs = stringify(
     redactValue ? REDACTED : rawValueInLhs,
-    createReplacer(config)
+    config
   );
-  const formattedValueInRhs = JSON.stringify(
+  const formattedValueInRhs = stringify(
     redactValue ? REDACTED : rawValueInRhs,
-    createReplacer(config)
+    config
   );
 
   let type = ChangeType.NOOP;
@@ -126,10 +153,12 @@ export function getObjectChangeResult(
 
   // If the type of change should be included in the results
   if (includeDiffType(type, config)) {
+    const stringifiedParsedKey = stringify(parsedKey, config);
+
     if (type === ChangeType.UPDATE && !config.showUpdatedOnly) {
       result.push({
         type: ChangeType.REMOVE,
-        str: `${JSON.stringify(parsedKey, createReplacer(config))}: ${formattedValueInLhs},`,
+        str: `${stringifiedParsedKey}: ${formattedValueInLhs},`,
         depth,
         path: [...path, lastPathValue(ChangeType.REMOVE, valueInLhs)],
       });
@@ -137,7 +166,7 @@ export function getObjectChangeResult(
 
     result.push({
       type,
-      str: `${JSON.stringify(parsedKey, createReplacer(config))}: ${formattedValue},`,
+      str: `${stringifiedParsedKey}: ${formattedValue},`,
       depth,
       path: [...path, lastPathValue(type, pathValue)],
     });

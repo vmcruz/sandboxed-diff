@@ -6,7 +6,6 @@ import diffConstructors from './diffConstructors';
 import { ChangeType } from '../utils/constants';
 import { areObjects, isNullOrUndefined, isPrimitive } from '../utils/fns';
 import {
-  createReplacer,
   includeDiffType,
   lastPathValue,
   timeoutSecurityCheck,
@@ -74,8 +73,8 @@ function recursiveDiff({
     }
 
     const parentDepth = depth - 1;
-    const lhsValue = JSON.stringify(lhs, createReplacer(config));
-    const rhsValue = JSON.stringify(rhs, createReplacer(config));
+    const lhsValue = stringify(lhs, config);
+    const rhsValue = stringify(rhs, config);
 
     const result = [];
 

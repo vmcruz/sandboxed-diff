@@ -292,6 +292,50 @@ describe('Diff Objects', () => {
     ]);
   });
 
+  it('handles the same reference multiple times', () => {
+    const sameRef = {};
+    const a = {
+      foo: sameRef,
+      bar: {
+        baz: sameRef,
+      },
+    };
+
+    a.self = a;
+
+    expect(diff(undefined, a)).toEqual([
+      { type: ChangeType.ADD, str: '{', depth: 0, path: [] },
+      {
+        type: ChangeType.ADD,
+        str: '"foo": {',
+        depth: 1,
+        path: ['foo'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: ['foo'] },
+      {
+        type: ChangeType.ADD,
+        str: '"bar": {',
+        depth: 1,
+        path: ['bar'],
+      },
+      {
+        type: ChangeType.ADD,
+        str: '"baz": {',
+        depth: 2,
+        path: ['bar', 'baz'],
+      },
+      { type: ChangeType.ADD, str: '},', depth: 2, path: ['bar', 'baz'] },
+      { type: ChangeType.ADD, str: '},', depth: 1, path: ['bar'] },
+      {
+        type: ChangeType.ADD,
+        str: '"self": [Circular],',
+        depth: 1,
+        path: ['self'],
+      },
+      { type: ChangeType.ADD, str: '}', depth: 0, path: [] },
+    ]);
+  });
+
   it('traverses the same object', () => {
     const a = { foo: 'bar' };
 
