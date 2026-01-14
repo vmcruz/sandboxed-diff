@@ -8,7 +8,10 @@ describe('Security checks', () => {
 
   // warmup
   for (let i = 0; i < 1e5; i++) {
+    // @ts-expect-error mimics deep nesting
     temp = temp.nested = {};
+
+    // @ts-expect-error mimics deep nesting
     bigObj.inner.nested[`key${i}`] = i;
   }
 
@@ -17,6 +20,7 @@ describe('Security checks', () => {
     const b = {};
 
     diff(a, b);
+    // @ts-expect-error expects object pollution
     expect({}.pollution).not.toEqual(true);
   });
 
@@ -34,7 +38,9 @@ describe('Security checks', () => {
       throw new Error('Timeout was not triggered!');
     } catch (e) {
       expect(performance.now() - start).toBeLessThan(150);
-      expect(e.message).toEqual('Diff took too much time! Aborting.');
+      expect((e as Error).message).toEqual(
+        'Diff took too much time! Aborting.'
+      );
     }
   });
 

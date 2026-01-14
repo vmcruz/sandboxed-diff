@@ -236,12 +236,16 @@ describe('Diff Objects', () => {
 
   it('handles custom classes as objects', () => {
     class MyClassA {
+      foo: string;
+
       constructor() {
         this.foo = 'bar';
       }
     }
 
     class MyClassB {
+      bar: string;
+
       constructor() {
         this.bar = 'foo';
       }
@@ -278,6 +282,8 @@ describe('Diff Objects', () => {
   it('handles circular references', () => {
     const a = {};
     const b = {};
+
+    // @ts-expect-error mimics circular
     b.foo = b;
 
     expect(diff(a, b)).toEqual([
@@ -301,6 +307,7 @@ describe('Diff Objects', () => {
       },
     };
 
+    // @ts-expect-error mimics circular
     a.self = a;
 
     expect(diff(undefined, a)).toEqual([

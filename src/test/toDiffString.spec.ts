@@ -12,7 +12,7 @@ const a = {
     notifications: true,
     layout: ['grid', 'compact'],
   },
-  metadata: new Map([
+  metadata: new Map<any, any>([
     [complexKey, 'value'], // Complex key (shared reference)
     ['role', 'admin'],
     ['permissions', new Set(['read', 'write', 'execute'])],
@@ -27,7 +27,7 @@ const a = {
   nestedEmpty: { a: {} },
 };
 
-// Circular reference
+// @ts-expect-error mimics circular
 a.self = a;
 
 const b = {
@@ -41,7 +41,7 @@ const b = {
     layout: ['list'], // Changed
     newFeature: true, // **Added property**
   },
-  metadata: new Map([
+  metadata: new Map<any, any>([
     [complexKey, 'newValue'], // **Value changed, key remains the same**
     ['role', 'user'], // Changed
     ['permissions', new Set(['read', 'execute'])], // Removed "write"
@@ -58,7 +58,7 @@ const b = {
   newProp: 'New Value', // **New property at root level**
 };
 
-// Circular reference
+// @ts-expect-error mimics circular
 b.self = b;
 
 describe('toDiffString', () => {
@@ -68,11 +68,11 @@ describe('toDiffString', () => {
     expect(result.toDiffString()).toMatchSnapshot();
   });
 
-  it('outputs without color', () => {
+  it('outputs with color', () => {
     const result = diff(a, b);
 
     const config = {
-      withColors: false,
+      withColors: true,
     };
 
     expect(result.toDiffString(config)).toMatchSnapshot();
@@ -82,8 +82,9 @@ describe('toDiffString', () => {
     const result = diff(a, b);
 
     const config = {
+      withColors: true,
       colors: {
-        [ChangeType.NOOP]: (str) => `\x1b[36m${str}\x1b[0m`,
+        [ChangeType.NOOP]: (str: string) => `\x1b[36m${str}\x1b[0m`,
       },
       symbols: {
         [ChangeType.ADD]: '@',
@@ -94,6 +95,31 @@ describe('toDiffString', () => {
     };
 
     expect(result.toDiffString(config)).toMatchSnapshot();
+  });
+
+  it('throws if colors or symbols are not defined', () => {
+    const result = diff(a, b);
+
+    const configNoSymbol = {
+      symbols: {
+        [ChangeType.ADD]: undefined,
+      },
+    };
+
+    expect(() => result.toDiffString(configNoSymbol)).toThrow(
+      '<add> symbol missing in config'
+    );
+
+    const configNoColor = {
+      withColors: true,
+      colors: {
+        [ChangeType.NOOP]: undefined,
+      },
+    };
+
+    expect(() => result.toDiffString(configNoColor)).toThrow(
+      '<noop> color function missing in config'
+    );
   });
 
   it('outputs with custom wrapper and indentSize', () => {
@@ -111,6 +137,6 @@ describe('toDiffString', () => {
     const result = diff(a, b);
 
     expect(result.toDiffString({ wrapper: [] })).toMatchSnapshot();
-    expect(result.toDiffString({ wrapper: null })).toMatchSnapshot();
+    expect(result.toDiffString({ wrapper: undefined })).toMatchSnapshot();
   });
 });

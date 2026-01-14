@@ -24,7 +24,7 @@ import toDiffString from './utils/toDiffString';
  * @param {DiffConfig['timeout']} [config.timeout=1000] - Throws when the diffing timeout is met
  * @param {DiffConfig['redactKeys']} [config.redactKeys=[]] - Replaces the values of these keys with *****
  */
-function diff(lhs: any, rhs: any, config: DiffConfig): Diff {
+function diff(lhs: any, rhs: any, config?: Partial<DiffConfig>): Diff {
   const defaultConfig: DiffConfig = {
     include: [
       ChangeType.ADD,

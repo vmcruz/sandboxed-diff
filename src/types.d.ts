@@ -15,8 +15,8 @@ type DiffSymbols = Record<ChangeType, string>;
 type DiffColors = Record<ChangeType, (str: string) => string>;
 
 export type PathHints = {
-  map: string;
-  set: string;
+  map?: string | boolean;
+  set?: string | boolean;
 };
 
 export type DiffConfig = {
@@ -97,17 +97,25 @@ export interface DiffConstructorArgs extends DiffMethodArgs {
   rhs: any;
 }
 
-export type DiffStringConfig = {
+type BaseDiffStringConfig = {
   withColors: boolean;
   indentSize: number;
   wrapper: Array<string>;
+};
+
+export type DiffStringConfig = BaseDiffStringConfig & {
   colors: DiffColors;
   symbols: DiffSymbols;
 };
 
+export type PartialDiffStringConfig = BaseDiffStringConfig & {
+  colors: Partial<DiffColors>;
+  symbols: Partial<DiffSymbols>;
+};
+
 export interface Diff extends Array<DiffResult> {
   /** String formatted with the Github's `diff` md format */
-  toDiffString: (config?: DiffStringConfig) => string;
+  toDiffString: (config?: Partial<PartialDiffStringConfig>) => string;
 
   /** lsh and rhs are structurally equal */
   equal: boolean;
