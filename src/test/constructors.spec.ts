@@ -66,7 +66,7 @@ describe('Diff Constructors', () => {
   });
 
   it('detects constructor changes between Set and []', () => {
-    const a = [];
+    const a: Array<string> = [];
     const b = new Set(['foo', 'bar']);
 
     expect(diff(a, b)).toEqual([
@@ -159,7 +159,7 @@ describe('Diff Constructors', () => {
   });
 
   it('detects sets constructor changes on empty structures', () => {
-    const a = [];
+    const a: Array<string> = [];
     const b = new Set();
 
     expect(diff(a, b)).toEqual([
@@ -179,7 +179,7 @@ describe('Diff Constructors', () => {
   });
 
   it('detects objects constructor changes on empty structures', () => {
-    const a = [];
+    const a: Array<string> = [];
     const b = {};
 
     expect(diff(a, b)).toEqual([

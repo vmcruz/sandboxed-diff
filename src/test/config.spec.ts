@@ -136,7 +136,7 @@ describe('With Config', () => {
 
     const a = {
       foo: 'bar',
-      map: new Map([
+      map: new Map<any, any>([
         [complex, true],
         ['test', 1],
         ['foo', 'bar'],
@@ -147,11 +147,12 @@ describe('With Config', () => {
       big: 1n,
     };
 
+    // @ts-expect-error mimics circular
     a.circular = a;
 
     const b = {
       foo: 'bar',
-      map: new Map([
+      map: new Map<any, any>([
         ['foo', 'bar'],
         ['test', 1],
         [complex, true],
@@ -162,6 +163,7 @@ describe('With Config', () => {
       big: BigInt(1),
     };
 
+    // @ts-expect-error mimics circular
     b.circular = b;
 
     expect(diff(a, b).equal).toEqual(true);

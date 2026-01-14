@@ -1,5 +1,6 @@
 import type { DiffResult, DiffStringConfig } from '../types';
 import { ChangeType } from './constants';
+import { isNullOrUndefined } from './fns';
 
 const ANSI_RESET = '\x1b[0m';
 
@@ -18,7 +19,7 @@ const ansiColors = {
  * Takes the diff result and returns a diff string in md. + Added, - Removed, ! Updated
  * @param {DiffResult[]} diff - The result from the diff
  * @param {DiffStringConfig} [config]
- * @param {DiffStringConfig['withColors']} [config.withColors=true] - If true, outputs the string formatted with AnsiColors
+ * @param {DiffStringConfig['withColors']} [config.withColors=false] - If true, outputs the string formatted with AnsiColors
  * @param {DiffStringConfig['colors']} [config.colors] - Each function takes a string and returns it formatted with ansi colors. Maps to each ChangeType.
  * @param {DiffStringConfig['symbols']} [config.symbols] - String map for each ChangeType
  * @param {DiffStringConfig['wrapper']} [config.wrapper=['```diff', '```']] - Strings that wrap the diff string output
@@ -29,7 +30,7 @@ export default function toDiffString(
   config?: DiffStringConfig
 ) {
   const defaultConfig: DiffStringConfig = {
-    withColors: true,
+    withColors: false,
     colors: ansiColors,
     wrapper: [],
     indentSize: 2,
@@ -56,6 +57,20 @@ export default function toDiffString(
 
   const diffString = diff
     .map(({ type, str, depth }, index) => {
+      if (
+        !Object.hasOwn(mergedConfig.symbols, type) ||
+        isNullOrUndefined(mergedConfig.symbols[type])
+      ) {
+        throw new Error(`<${type}> symbol missing in config`);
+      }
+
+      if (
+        !Object.hasOwn(mergedConfig.colors, type) ||
+        isNullOrUndefined(mergedConfig.colors[type])
+      ) {
+        throw new Error(`<${type}> color function missing in config`);
+      }
+
       let symbolString = mergedConfig.symbols[type];
 
       if (index > 0 && index < diff.length - 1 && !symbolString.length) {

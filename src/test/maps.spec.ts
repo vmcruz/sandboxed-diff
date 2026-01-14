@@ -2,12 +2,12 @@ import diff, { ChangeType } from '..';
 
 describe('Diff Maps', () => {
   it('supports Maps', () => {
-    const a = new Map([
+    const a = new Map<any, any>([
       ['foo', 'baz'],
       ['1', 1],
     ]);
 
-    const b = new Map([
+    const b = new Map<any, any>([
       ['foo', 'bar'],
       ['test', 1],
     ]);
@@ -65,7 +65,7 @@ describe('Diff Maps', () => {
     const mapKey = new Map([['foo', 1]]);
 
     const a = new Map([[objKey, 'baz']]);
-    const b = new Map([
+    const b = new Map<any, any>([
       ['foo', 'bar'],
       [objKey, 'bar'],
       [setKey, 'bar'],
@@ -116,19 +116,19 @@ describe('Diff Maps', () => {
   });
 
   it('handles nested Maps', () => {
-    const a = new Map([
+    const a = new Map<any, any>([
       ['foo', 'baz'],
       ['nested', new Map([['nested', 'mep']])],
       [
         'deeply-nested',
-        new Map([
+        new Map<any, any>([
           ['inside-deeply-nested', 'map'],
           ['last', new Map([['nested', 'mep']])],
         ]),
       ],
     ]);
 
-    const b = new Map([
+    const b = new Map<any, any>([
       ['foo', 'bar'],
       ['nested', new Map([['nested', 'map']])],
       [
@@ -328,6 +328,8 @@ describe('Diff Maps', () => {
 
   it('handles circular references in keys', () => {
     const objKey = {};
+
+    // @ts-expect-error mimics circular
     objKey.self = objKey;
 
     const setKey = new Set();
