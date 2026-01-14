@@ -28,15 +28,14 @@ jobs:
           node-version-file: 'package.json'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Update npm to latest
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: npm ci
 
       - name: Build package
         run: npm run build
 
-      - name: Extract dist tag from version
-        id: dist_tag
-        run: echo "value=$(cat package.json | jq -r '.version | split("-") | .[1] // "latest" | split(".") | .[0]')" >> $GITHUB_OUTPUT
-
       - name: Publish to npm
-        run: npm publish --provenance --tag ${{ steps.dist_tag.outputs.value }} --access=public
+        run: npm publish --access public

@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vmcruz/sandboxed-diff.git"
+    "url": "https://github.com/vmcruz/sandboxed-diff"
   },
   "keywords": [
     "javascript",
