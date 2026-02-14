@@ -1,5 +1,12 @@
 import recursiveDiff from './diff';
-import type { DiffConfig, DiffStringConfig, Diff } from './types';
+import type {
+  DiffConfig,
+  DiffStringConfig,
+  Diff,
+  DiffResult,
+  DiffColors,
+  DiffSymbols,
+} from './types';
 import {
   ChangeType,
   DefaultPathHints,
@@ -104,6 +111,6 @@ function diff(lhs: any, rhs: any, config?: Partial<DiffConfig>): Diff {
   return diffResult as Diff;
 }
 
-export { ChangeType };
+export { ChangeType, DiffResult, DiffColors, DiffSymbols };
 
 export default diff;
