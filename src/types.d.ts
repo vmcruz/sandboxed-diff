@@ -11,8 +11,8 @@ export type DiffResult = {
   path: Array<any>;
 };
 
-type DiffSymbols = Record<ChangeType, string>;
-type DiffColors = Record<ChangeType, (str: string) => string>;
+export type DiffSymbols = Record<ChangeType, string>;
+export type DiffColors = Record<ChangeType, (str: string) => string>;
 
 export type PathHints = {
   map?: string | boolean;
