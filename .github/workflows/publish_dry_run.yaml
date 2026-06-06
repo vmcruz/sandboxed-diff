@@ -35,9 +35,5 @@ jobs:
       - name: Build package
         run: npm run build
 
-      - name: Extract dist tag from version
-        id: dist_tag
-        run: echo "value=$(cat package.json | jq -r '.version | split("-") | .[1] // "latest" | split(".") | .[0]')" >> $GITHUB_OUTPUT
-
-      - name: Dry run publish (${{ steps.dist_tag.outputs.value }})
-        run: npm publish --dry-run --provenance --tag ${{ steps.dist_tag.outputs.value }} --access=public
+      - name: Dry run publish
+        run: npm publish --dry-run --provenance --access public
