@@ -19,7 +19,8 @@
     "test:coverage": "jest --coverage=true",
     "lint": "eslint",
     "bump:beta": "./scripts/bump_beta.sh",
-    "build": "tsc --version && tsc --noEmit && npm run lint && npm run test && tsup"
+    "verify:build": "tsc --version && tsc --noEmit && npm run lint && npm run test",
+    "build": "tsup"
   },
   "repository": {
     "type": "git",
@@ -59,7 +60,7 @@
     "jest": "30.0.0-alpha.7",
     "prettier": "3.5.1",
     "tsup": "^8.4.0",
-    "typescript": "5.7.3",
+    "typescript": "^5.8.3",
     "typescript-eslint": "^8.24.1"
   },
   "engines": {
