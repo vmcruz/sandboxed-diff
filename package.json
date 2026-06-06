@@ -20,7 +20,7 @@
     "lint": "eslint",
     "bump:beta": "./scripts/bump_beta.sh",
     "verify:build": "tsc --version && tsc --noEmit && npm run lint && npm run test",
-    "build": "tsup"
+    "build": "npm run verify:build && tsup"
   },
   "repository": {
     "type": "git",
