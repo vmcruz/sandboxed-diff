@@ -9,6 +9,7 @@
     "target": "ES2022",
     "declaration": false,
     "strict": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "types": ["jest", "node"]
   }
 }
